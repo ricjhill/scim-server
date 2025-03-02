@@ -17,19 +17,11 @@ A System for Cross-domain Identity Management (SCIM) 2.0 server implementation u
 This SCIM server acts as a bridge between SCIM clients and Microsoft Entra ID (formerly Azure AD). It translates SCIM requests into Microsoft Graph API calls, allowing you to use Microsoft Entra ID as your identity provider while maintaining SCIM compatibility.
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────────┐
-│             │     │             │     │                 │
-│ SCIM Client │────▶│ SCIM Server │────▶│ Microsoft Entra │
-│             │     │             │     │       ID        │
-└─────────────┘     └─────────────┘     └─────────────────┘
-                                               │
-                                               │
-                                               ▼
-                                        ┌─────────────┐
-                                        │             │
-                                        │ Graph API   │
-                                        │             │
-                                        └─────────────┘
+┌─────────────┐     ┌─────────────┐     ┌───────────────────────────┐
+│             │     │             │     │                           │
+│ SCIM Client │────▶│ SCIM Server │────▶│ Microsoft Entra ID        │
+│             │     │             │     │ (via Microsoft Graph API) │
+└─────────────┘     └─────────────┘     └───────────────────────────┘
 ```
 
 The server handles:
