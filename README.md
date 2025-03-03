@@ -41,7 +41,7 @@ The server handles:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/scim-server.git
+   git clone https://github.com/ricjhill/scim-server.git
    cd scim-server
    ```
 
