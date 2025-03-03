@@ -87,6 +87,18 @@ DEBUG=True
 | DEBUG | Set to "True" for development, "False" for production |
 | CORS_ORIGINS | Comma-separated list of allowed origins for CORS (optional) |
 
+
+
+For the SESSION_SECRET, you should use a strong random string. You can generate one using Python:
+python
+
+```bash
+import secrets
+print(secrets.token_hex(24))  # Generates a 48-character hex string
+```
+
+
+
 ## Usage
 
 ### Running the Server
