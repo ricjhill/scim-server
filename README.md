@@ -19,7 +19,7 @@ This SCIM server acts as a bridge between SCIM clients and Microsoft Entra ID (f
 ```
 ┌─────────────┐     ┌─────────────┐     ┌───────────────────────────┐
 │             │     │             │     │                           │
-│ SCIM Client │────▶│ SCIM Server │────▶│ Microsoft Entra ID        │
+│ SCIM Client │───▶│ SCIM Server │────▶│ Microsoft Entra ID        │
 │             │     │             │     │ (via Microsoft Graph API) │
 └─────────────┘     └─────────────┘     └───────────────────────────┘
 ```
