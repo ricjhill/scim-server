@@ -13,7 +13,7 @@ class Member(BaseModel):
     value: str
     display: Optional[str] = None
     type: Optional[str] = None
-    $ref: Optional[str] = None
+    ref: Optional[str] = None
 
 class GroupSchema(BaseModel):
     schemas: List[str] = ["urn:ietf:params:scim:schemas:core:2.0:Group"]

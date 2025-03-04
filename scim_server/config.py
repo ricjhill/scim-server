@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     CLIENT_ID: str = os.environ.get("CLIENT_ID", "")
     CLIENT_SECRET: str = os.environ.get("CLIENT_SECRET", "")
     TENANT_ID: str = os.environ.get("TENANT_ID", "")
-    AUTHORITY: str = None
+    AUTHORITY: Optional[str] = None
     REDIRECT_URI: str = os.environ.get("REDIRECT_URI", "http://localhost:8000/auth/callback")
     SCOPE: List[str] = ["User.Read", "User.ReadBasic.All", "Directory.Read.All"]
     
