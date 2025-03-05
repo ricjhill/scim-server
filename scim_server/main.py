@@ -3,7 +3,7 @@ Main application entry point for the SCIM server.
 """
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import msal
@@ -35,7 +35,7 @@ app.add_middleware(
     secret_key=settings.SESSION_SECRET,
     session_cookie="scim_session",      # Explicit cookie name
     max_age=60 * 60 * 24,               # 1 day in seconds
-    same_site="lax",                    # Allow cookies for redirects
+    same_site="lax",                    # More compatible with HTTP sites
     https_only=False                    # Set to True in production with HTTPS
 )
 
@@ -58,7 +58,12 @@ async def login():
     """
     Redirect to Microsoft Entra ID login page.
     """
-    return RedirectResponse(EntraAuth.get_auth_url())
+    auth_url = EntraAuth.get_auth_url()
+    logger.debug(f"Redirecting to auth URL: {auth_url}")
+    
+    # Use direct RedirectResponse for the login page
+    # This is a simple external redirect that doesn't need to set cookies
+    return RedirectResponse(auth_url, status_code=302)
 
 
 @app.get("/auth/callback")
@@ -100,36 +105,48 @@ async def auth_callback(request: Request, code: str):
         
         # Store in session
         logger.debug("Storing token and user info in session...")
-        request.session["token"] = token_result
-        request.session["user"] = user_info
+        request.session["token"] = {
+            "access_token": token_result["access_token"],
+            "expires_in": token_result.get("expires_in"),
+            "token_type": token_result.get("token_type")
+        }
+        request.session["user"] = {
+            "id": user_info.get("id"),
+            "displayName": user_info.get("displayName"),
+            "userPrincipalName": user_info.get("userPrincipalName")
+        }
 
-
-        # Force the session to be saved
+       # Force the session to be saved
         request.scope["session"] = request.session
         request.scope["session"].update({})  # Force a modification to ensure saving
+ 
 
-        # Add debug for cookie
-        logger.debug(f"Session cookie will be set")
-
-
-
-
-
-
+        # Create a redirect response
+        response = RedirectResponse(url="/", status_code=302)
+        
+        
         # Check if session was actually set
-        logger.debug(f"Session contains token: {'token' in request.session}")
+        logger.debug(f"Session contains token: {'token' in request.session }")
         logger.debug(f"Session contains user: {'user' in request.session}")
         
+        # Log the response headers for debugging
+        logger.debug("Response headers will be:")
+        for header, value in response.headers.items():
+            logger.debug(f"  {header}: {value}")
+        
+        
+        # Log session size for debugging
+        import json
+        session_data = json.dumps(dict(request.session))
+        logger.debug(f"Session data size: {len(session_data)} bytes")
+        
+        
+        
+      
+        
         logger.debug("Redirecting to home page...")
-
-
-
-
-
-
-
-
-        return RedirectResponse("/")
+        
+        return response
         
     except Exception as e:
         logger.error(f"Unexpected error in auth callback: {str(e)}")
@@ -147,6 +164,91 @@ async def logout(request: Request):
     """
     request.session.clear()
     return RedirectResponse("/")
+
+# Debug routes
+@app.get("/test-login")
+async def test_login(request: Request):
+    """
+    Test endpoint that sets session without redirect.
+    This is useful for testing if the session middleware is working correctly.
+    """
+    # Set some test data in the session
+    request.session["test_user"] = {"name": "Test User", "role": "tester"}
+    request.session["test_time"] = str(logging.Formatter().converter())
+    
+    # Force the session to be saved
+    request.scope["session"] = request.session
+    request.scope["session"].update({})  # Force a modification to ensure saving
+    
+    # Log what we're doing
+    logger.debug("Setting test session data in /test-login endpoint")
+    logger.debug(f"Session contains test_user: {'test_user' in request.session}")
+    
+    # Return a simple response
+    return {
+        "message": "Test session data set successfully",
+        "next_steps": "Check /debug-session to verify the session data was saved",
+        "session_keys": list(request.session.keys())
+    }
+
+@app.get("/debug-cookies")
+async def debug_cookies(request: Request):
+    """
+    Debug endpoint to check all cookies and set a test cookie.
+    """
+    # Get all cookies
+    all_cookies = request.cookies
+    
+    # Create a response with a test cookie
+    response = JSONResponse({
+        "all_cookies": {k: "Present" for k in all_cookies.keys()},
+        "cookie_count": len(all_cookies),
+        "request_headers": {k: v for k, v in request.headers.items()},
+        "test_cookie_set": True
+    })
+    
+    # Set a test cookie with the same settings as the session cookie
+    response.set_cookie(
+        key="test_cookie",
+        value="test_value",
+        max_age=300,  # 5 minutes
+        httponly=True,
+        samesite="lax",  # Match the session cookie setting
+        secure=False
+    )
+    
+    return response
+
+@app.get("/debug-session")
+async def debug_session(request: Request):
+    """
+    Debug endpoint to check session status.
+    """
+    # Check if session exists in request scope
+    session_exists = "session" in request.scope
+    
+    # Get the session cookie
+    session_cookie = request.cookies.get("scim_session", "Not found")
+    
+    # Get session data keys (without exposing sensitive values)
+    session_data = {}
+    if hasattr(request, "session"):
+        session_data = {k: "Present" for k in request.session.keys()}
+    
+    # Check if user is in session
+    user_in_session = "user" in request.session if hasattr(request, "session") else False
+    
+    # Check if token is in session
+    token_in_session = "token" in request.session if hasattr(request, "session") else False
+    
+    return {
+        "session_exists": session_exists,
+        "session_cookie": "Present" if session_cookie != "Not found" else "Not found",
+        "session_cookie_length": len(session_cookie) if session_cookie != "Not found" else 0,
+        "session_data_keys": session_data,
+        "user_in_session": user_in_session,
+        "token_in_session": token_in_session
+    }
 
 # Main routes
 @app.get("/")
