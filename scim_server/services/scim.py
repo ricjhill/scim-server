@@ -65,9 +65,15 @@ class SCIMService:
         graph_filter = SCIMFilter.convert_to_graph_filter(filter_str)
         filter_param = f"$filter={graph_filter}" if graph_filter else ""
         
-        # Add pagination
-        skip = max(0, start_index - 1)
-        pagination = f"$skip={skip}&$top={count}"
+        # Add pagination - only use $top for now (first page only)
+        if start_index != 1:
+            # For now, we'll return an error for pagination beyond the first page
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Pagination beyond the first page is not supported yet"
+            )
+        
+        pagination = f"$top={count}"
         
         # Build query string
         query = f"?{filter_param}&{pagination}" if filter_param else f"?{pagination}"
@@ -154,9 +160,15 @@ class SCIMService:
         graph_filter = SCIMFilter.convert_to_graph_filter(filter_str)
         filter_param = f"$filter={graph_filter}" if graph_filter else ""
         
-        # Add pagination
-        skip = max(0, start_index - 1)
-        pagination = f"$skip={skip}&$top={count}"
+        # Add pagination - only use $top for now (first page only)
+        if start_index != 1:
+            # For now, we'll return an error for pagination beyond the first page
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Pagination beyond the first page is not supported yet"
+            )
+        
+        pagination = f"$top={count}"
         
         # Build query string
         query = f"?{filter_param}&{pagination}" if filter_param else f"?{pagination}"
