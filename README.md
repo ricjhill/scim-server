@@ -242,6 +242,82 @@ async def handle_errors():
         print(f"Error message: {e.detail}")
 ```
 
+## Using the SCIM Server via Browser
+
+### Starting the Server
+
+To start the SCIM server locally:
+
+```bash
+# Navigate to the project directory
+cd scim-server
+
+# Start the server
+python -m scim_server.main
+```
+
+The server will start on http://localhost:8000 by default.
+
+### Authentication
+
+1. Open your browser and navigate to http://localhost:8000/login
+2. You'll be redirected to the Microsoft Entra ID login page
+3. Sign in with your Microsoft credentials
+4. After successful authentication, you'll be redirected back to the SCIM server
+
+### Exploring Endpoints
+
+Once authenticated, you can access:
+
+- **Home Page**: http://localhost:8000/ - Shows basic server information and available endpoints
+- **Users Endpoint**: http://localhost:8000/scim/v2/Users - For user operations
+- **Groups Endpoint**: http://localhost:8000/scim/v2/Groups - For group operations
+
+### Testing API Endpoints
+
+You can use browser tools or extensions like [Postman](https://www.postman.com/) or [REST Client for VS Code](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) to test the API endpoints:
+
+#### Example: Get Users
+- **URL**: http://localhost:8000/scim/v2/Users
+- **Method**: GET
+- **Headers**: 
+  - Authorization: Bearer {your_access_token}
+
+#### Example: Create User
+- **URL**: http://localhost:8000/scim/v2/Users
+- **Method**: POST
+- **Headers**: 
+  - Authorization: Bearer {your_access_token}
+  - Content-Type: application/json
+- **Body**:
+```json
+{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+  "userName": "john.doe@example.com",
+  "name": {
+    "givenName": "John",
+    "familyName": "Doe"
+  },
+  "displayName": "John Doe",
+  "active": true,
+  "emails": [
+    {
+      "value": "john.doe@example.com",
+      "type": "work",
+      "primary": true
+    }
+  ]
+}
+```
+
+### Debugging
+
+For troubleshooting, you can use these debug endpoints:
+
+- **Session Debug**: http://localhost:8000/debug-session - Shows session information
+- **Cookies Debug**: http://localhost:8000/debug-cookies - Shows cookie information
+- **Health Check**: http://localhost:8000/health - Checks if the server is running properly
+
 ## Complete Examples
 
 For complete examples, see the `examples` directory:
