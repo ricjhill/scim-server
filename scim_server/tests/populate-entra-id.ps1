@@ -73,11 +73,16 @@ function Handle-Error {
     
     Write-ColorOutput "Error during $Operation" "Red"
     
-    try {
-        $errorResponse = $ErrorRecord.ErrorDetails.Message | ConvertFrom-Json
-        Write-ColorOutput "Error message: $($errorResponse.error.message)" "Red"
+    if ($ErrorRecord.ErrorDetails -and $ErrorRecord.ErrorDetails.Message) {
+        try {
+            $errorResponse = $ErrorRecord.ErrorDetails.Message | ConvertFrom-Json
+            Write-ColorOutput "Error message: $($errorResponse.error.message)" "Red"
+        }
+        catch {
+            Write-ColorOutput "Error message: $($ErrorRecord.ErrorDetails.Message)" "Red"
+        }
     }
-    catch {
+    else {
         Write-ColorOutput "Error message: $($ErrorRecord.Exception.Message)" "Red"
     }
 }
