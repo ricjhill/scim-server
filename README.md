@@ -16,7 +16,7 @@ A Python library for programmatically creating and managing different identity t
 
 ## Architecture Overview
 
-This SCIM server acts as a bridge between SCIM clients and Microsoft Entra ID (formerly Azure AD). It translates SCIM requests into Microsoft Graph API calls allowing you to use Microsoft Entra ID as your identity provider while maintaining SCIM compatibility.
+This SCIM server acts as a bridge between SCIM clients and Microsoft Entra ID . It translates SCIM requests into Microsoft Graph API calls allowing you to use Microsoft Entra ID as your identity provider while maintaining SCIM compatibility.
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌───────────────────────────┐
